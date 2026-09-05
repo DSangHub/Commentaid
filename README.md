@@ -1,22 +1,24 @@
-Simple Next.js landing page for Commentaid.
+# Commentaid
+
+Commentaid is an AI bridge for influencers and businesses managing multilingual comments on posts and ads.
+
+## Features
+
+- Landing page plus Supabase email/password authentication
+- Manual Paste Comment → translate → draft → edit → Copy Reply workflow
+- Three native-language reply options with English translations
+- Intent detection and sensitive-comment escalation labels
+- Authenticated, rate-limited AI and YouTube API routes
+- YouTube channel comment monitoring
 
 ## Local development
 
-```bash
-npm install
-npm run dev
-```
+1. Copy `.env.example` to `.env.local` and enter the required keys.
+2. Install dependencies with `npm install`.
+3. Start with `npm run dev`.
 
-## Deploy to Vercel
+## Vercel configuration
 
-1. Create a new GitHub repository.
-2. Upload/push these files.
-3. In Vercel, choose **Add New Project**.
-4. Import the GitHub repository.
-5. Vercel should detect Next.js automatically.
-6. Click **Deploy**.
-7. Add `commentaid.com` and `commentaid.app` under Project → Settings → Domains.
+Add the variables shown in `.env.example` to Production and Preview. The app accepts either the current Supabase publishable key or the legacy anon key. AI requests use `OPENAI_API_KEY`; when it is absent, Vercel AI Gateway is used.
 
-## Before launch
-
-Replace `hello@commentaid.com` in `app/page.js` if you want a different early-access email.
+The API routes verify every bearer token with Supabase Auth. Never expose a Supabase secret/service-role key or the OpenAI key through a `NEXT_PUBLIC_` variable.

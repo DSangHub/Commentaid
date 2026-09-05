@@ -1,7 +1,9 @@
+import "./globals.css";
+
 export const metadata = {
   title: "Commentaid — Turn Comments Into Conversations",
   description:
-    "AI-powered comment assistance for creators and businesses. Translate, reply faster, resolve issues, and discover sales opportunities."
+    "AI-powered multilingual comment assistance for creators and businesses.",
 };
 
 export default function RootLayout({ children }) {
