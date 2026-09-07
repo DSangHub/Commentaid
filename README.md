@@ -1,24 +1,30 @@
 # Commentaid
 
-Commentaid is an AI bridge for influencers and businesses managing multilingual comments on posts and ads.
+AI-powered comment monitoring for creators and businesses. Reads YouTube
+comments, detects language, translates, and drafts 3 reply options in the
+commenter's own language. Includes a "Try it" box to demo the AI on any comment.
 
-## Features
+## Required environment variables
 
-- Landing page plus Supabase email/password authentication
-- Manual Paste Comment → translate → draft → edit → Copy Reply workflow
-- Three native-language reply options with English translations
-- Intent detection and sensitive-comment escalation labels
-- Authenticated, rate-limited AI and YouTube API routes
-- YouTube channel comment monitoring
+Set these in **Vercel → Project → Settings → Environment Variables** (and in
+`.env.local` for local dev). See `.env.example`.
 
-## Local development
+| Variable | What it's for | Where to get it |
+|---|---|---|
+| `ANTHROPIC_API_KEY` | AI reply drafting | console.anthropic.com |
+| `YOUTUBE_API_KEY` | Reading YouTube comments | Google Cloud → APIs & Services → Credentials |
 
-1. Copy `.env.example` to `.env.local` and enter the required keys.
-2. Install dependencies with `npm install`.
-3. Start with `npm run dev`.
+The Supabase URL + publishable key in `app/lib/supabaseClient.js` are public by
+design (protected by row-level security) and are safe to commit.
 
-## Vercel configuration
+## Run locally
 
-Add the variables shown in `.env.example` to Production and Preview. The app accepts either the current Supabase publishable key or the legacy anon key. AI requests use `OPENAI_API_KEY`; when it is absent, Vercel AI Gateway is used.
+```
+npm install
+npm run dev
+```
 
-The API routes verify every bearer token with Supabase Auth. Never expose a Supabase secret/service-role key or the OpenAI key through a `NEXT_PUBLIC_` variable.
+## Deploy
+
+Push to GitHub and import the repo into Vercel (or connect the repo to the
+existing Vercel project), then add the environment variables above.
