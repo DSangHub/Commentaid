@@ -105,7 +105,10 @@ textarea { resize: vertical; line-height: 1.5; }
 .replyOption { text-align: left; min-height: 125px; display: flex; flex-direction: column; gap: 8px; border: 1px solid var(--line); border-radius: 14px; background: var(--white); padding: 14px; }
 .replyOption strong { color: var(--violet); }
 .replyOption span { line-height: 1.42; }
+.replyOption .draftEnglish { color: var(--ink); font-weight: 600; }
+.replyOption .draftNative { color: var(--muted); border-top: 1px solid var(--line); padding-top: 8px; }
 .replyOption.selected { border-color: var(--violet); box-shadow: 0 0 0 2px rgba(91,91,214,.12); }
+.replyReview { margin-top: 4px; }
 .copyButton { margin-top: 10px; background: var(--violet); color: var(--white); }
 .channelForm { display: grid; grid-template-columns: 1fr auto; gap: 10px; }
 .channelSummary { margin-top: 20px; display: flex; justify-content: space-between; gap: 12px; padding: 14px 0; border-bottom: 1px solid var(--line); color: var(--muted); }

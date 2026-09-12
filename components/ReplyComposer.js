@@ -10,6 +10,7 @@ export default function ReplyComposer({ getAccessToken, initialComment = "" }) {
   const [tone, setTone] = useState("Helpful");
   const [result, setResult] = useState(null);
   const [reply, setReply] = useState("");
+  const [englishReply, setEnglishReply] = useState("");
   const [busy, setBusy] = useState(false);
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState("");
@@ -46,6 +47,7 @@ export default function ReplyComposer({ getAccessToken, initialComment = "" }) {
       if (!response.ok) throw new Error(data.error || "Reply generation failed.");
       setResult(data);
       setReply(data.options?.[0]?.reply || "");
+      setEnglishReply(data.options?.[0]?.replyEnglish || "");
     } catch (requestError) {
       setError(requestError.message || "Could not reach Commentaid AI.");
     } finally {
@@ -138,13 +140,20 @@ export default function ReplyComposer({ getAccessToken, initialComment = "" }) {
                 type="button"
                 onClick={() => {
                   setReply(option.reply);
+                  setEnglishReply(option.replyEnglish);
                   setCopied(false);
                 }}
               >
                 <strong>{option.style}</strong>
-                <span>{option.reply}</span>
+                <span className="draftEnglish">English: {option.replyEnglish}</span>
+                <span className="draftNative">{result.language}: {option.reply}</span>
               </button>
             ))}
+          </div>
+
+          <div className="translationBox replyReview" aria-live="polite">
+            <strong>Review the reply in English</strong>
+            <p>{englishReply}</p>
           </div>
 
           <label htmlFor="final-reply">Edit, then copy the native-language reply</label>
