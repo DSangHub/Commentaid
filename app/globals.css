@@ -110,6 +110,9 @@ textarea { resize: vertical; line-height: 1.5; }
 .replyOption.selected { border-color: var(--violet); box-shadow: 0 0 0 2px rgba(91,91,214,.12); }
 .replyReview { margin-top: 4px; }
 .copyButton { margin-top: 10px; background: var(--violet); color: var(--white); }
+.postButton { margin: 10px 0 0 10px; }
+.integrationRow { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+.integrationRow p { margin: 6px 0; color: var(--muted); }
 .channelForm { display: grid; grid-template-columns: 1fr auto; gap: 10px; }
 .channelSummary { margin-top: 20px; display: flex; justify-content: space-between; gap: 12px; padding: 14px 0; border-bottom: 1px solid var(--line); color: var(--muted); }
 .channelSummary strong { color: var(--ink); }
@@ -124,6 +127,8 @@ textarea { resize: vertical; line-height: 1.5; }
 @media (max-width: 800px) {
   .hero h1 { letter-spacing: -3px; }
   .grid, .split, .replyOptions, .composerGrid { grid-template-columns: 1fr; }
+  .integrationRow { align-items: stretch; flex-direction: column; }
+  .postButton { margin-left: 0; }
   .cta { margin-left: 18px; margin-right: 18px; flex-direction: column; align-items: flex-start; }
   footer { flex-direction: column; }
   .navLink { display: none; }

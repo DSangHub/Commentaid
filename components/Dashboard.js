@@ -17,7 +17,11 @@ export default function Dashboard() {
   const [feedError, setFeedError] = useState(
     supabase ? "" : "Commentaid authentication is not configured."
   );
-  const [selectedComment, setSelectedComment] = useState("");
+  const [selectedComment, setSelectedComment] = useState({ text: "", id: "" });
+  const [youtubeAccounts, setYoutubeAccounts] = useState([]);
+  const [managedFeed, setManagedFeed] = useState(null);
+  const [integrationBusy, setIntegrationBusy] = useState(false);
+  const [integrationMessage, setIntegrationMessage] = useState("");
 
   useEffect(() => {
     if (!supabase) return undefined;
@@ -40,6 +44,67 @@ export default function Dashboard() {
     }
     return data.session.access_token;
   }, [router, supabase]);
+
+  const loadYouTubeStatus = useCallback(async () => {
+    try {
+      const token = await getAccessToken();
+      const response = await fetch("/api/integrations/youtube/status", { headers: { authorization: `Bearer ${token}` } });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Could not check YouTube connection.");
+      setYoutubeAccounts(data.accounts || []);
+      if (data.accounts?.length) {
+        const commentsResponse = await fetch(`/api/integrations/youtube/comments?accountId=${data.accounts[0].id}`, { headers: { authorization: `Bearer ${token}` } });
+        const commentsData = await commentsResponse.json();
+        if (commentsResponse.ok) setManagedFeed(commentsData);
+      }
+    } catch (error) {
+      setIntegrationMessage(error.message || "Could not check YouTube connection.");
+    }
+  }, [getAccessToken]);
+
+  useEffect(() => {
+    if (!user) return undefined;
+    const timer = window.setTimeout(() => loadYouTubeStatus(), 0);
+    return () => window.clearTimeout(timer);
+  }, [user, loadYouTubeStatus]);
+
+  async function connectYouTube() {
+    setIntegrationBusy(true);
+    setIntegrationMessage("");
+    try {
+      const token = await getAccessToken();
+      const response = await fetch("/api/integrations/youtube/connect", { method: "POST", headers: { authorization: `Bearer ${token}` } });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Could not connect YouTube.");
+      window.location.assign(data.url);
+    } catch (error) {
+      setIntegrationMessage(error.message || "Could not connect YouTube.");
+      setIntegrationBusy(false);
+    }
+  }
+
+  async function syncManagedComments() {
+    const account = youtubeAccounts[0];
+    if (!account) return;
+    setIntegrationBusy(true);
+    setIntegrationMessage("");
+    try {
+      const token = await getAccessToken();
+      const response = await fetch("/api/integrations/youtube/comments", {
+        method: "POST",
+        headers: { "content-type": "application/json", authorization: `Bearer ${token}` },
+        body: JSON.stringify({ accountId: account.id }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Could not sync comments.");
+      setIntegrationMessage(`${data.synced} comments synced.`);
+      await loadYouTubeStatus();
+    } catch (error) {
+      setIntegrationMessage(error.message || "Could not sync comments.");
+    } finally {
+      setIntegrationBusy(false);
+    }
+  }
 
   async function loadChannel(event) {
     event.preventDefault();
@@ -84,7 +149,44 @@ export default function Dashboard() {
         <p>Manage multilingual comments from any post or ad through one AI bridge.</p>
       </header>
 
-      <ReplyComposer key={selectedComment || "manual"} getAccessToken={getAccessToken} initialComment={selectedComment} />
+      <section className="workspaceCard integrationCard" aria-labelledby="youtube-connect-title">
+        <div className="cardHeading">
+          <div>
+            <p className="eyebrow">MANAGED ACCOUNTS</p>
+            <h2 id="youtube-connect-title">YouTube connection</h2>
+          </div>
+          <span className="statusDot">Approval required</span>
+        </div>
+        {youtubeAccounts.length ? (
+          <div className="integrationRow">
+            <div><strong>{youtubeAccounts[0].display_name}</strong><p>Connected · Replies post only after approval</p></div>
+            <button className="button primary" type="button" onClick={syncManagedComments} disabled={integrationBusy}>{integrationBusy ? "Syncing…" : "Sync comments"}</button>
+          </div>
+        ) : (
+          <div className="integrationRow">
+            <p>Authorize Commentaid to read comments and post only the replies you approve.</p>
+            <button className="button primary" type="button" onClick={connectYouTube} disabled={integrationBusy}>{integrationBusy ? "Opening Google…" : "Connect YouTube"}</button>
+          </div>
+        )}
+        {integrationMessage && <div className="banner" role="status">{integrationMessage}</div>}
+      </section>
+
+      <ReplyComposer key={selectedComment.id || selectedComment.text || "manual"} getAccessToken={getAccessToken} initialComment={selectedComment.text} initialCommentId={selectedComment.id} />
+
+      {managedFeed?.comments?.length > 0 && (
+        <section className="workspaceCard" aria-labelledby="managed-comments-title">
+          <div className="cardHeading"><div><p className="eyebrow">APPROVAL QUEUE</p><h2 id="managed-comments-title">Connected-channel comments</h2></div></div>
+          <div className="commentList">
+            {managedFeed.comments.map((comment) => (
+              <article className="commentCard" key={comment.id}>
+                <div className="commentMeta"><strong>{comment.author_name}</strong><span>{comment.status}</span></div>
+                <p>{comment.body}</p>
+                <button className="miniButton accent" type="button" onClick={() => { setSelectedComment({ text: comment.body, id: comment.id }); window.scrollTo({ top: 0, behavior: "smooth" }); }}>Draft managed reply</button>
+              </article>
+            ))}
+          </div>
+        </section>
+      )}
 
       <section className="workspaceCard" aria-labelledby="monitor-title">
         <div className="cardHeading">
@@ -130,7 +232,7 @@ export default function Dashboard() {
                   className="miniButton accent"
                   type="button"
                   onClick={() => {
-                    setSelectedComment(comment.text);
+                    setSelectedComment({ text: comment.text, id: "" });
                     window.scrollTo({ top: 0, behavior: "smooth" });
                   }}
                 >

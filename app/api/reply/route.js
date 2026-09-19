@@ -1,7 +1,7 @@
 import { Output, generateText } from "ai";
 import { createOpenAI } from "@ai-sdk/openai";
 import { z } from "zod";
-import { requireUser } from "../../../lib/supabase";
+import { createAdminSupabase, requireUser } from "../../../lib/supabase";
 import { checkRateLimit } from "../../../lib/rate-limit";
 
 export const runtime = "nodejs";
@@ -56,6 +56,7 @@ export async function POST(request) {
     const comment = typeof body.comment === "string" ? body.comment.trim() : "";
     const context = typeof body.context === "string" ? body.context.trim() : "";
     const tone = typeof body.tone === "string" ? body.tone.trim() : "Helpful";
+    const commentId = typeof body.commentId === "string" ? body.commentId : "";
 
     if (!comment || comment.length > 3000) {
       return Response.json(
@@ -78,7 +79,30 @@ For spam or abuse, remain calm and do not intensify the exchange.`,
       prompt: `Requested tone: ${tone}\nBusiness context: ${context || "None provided"}\nComment: ${comment}`,
     });
 
-    return Response.json(output, {
+    let responseOutput = output;
+    if (commentId) {
+      const admin = createAdminSupabase();
+      const { data: managedComment, error: commentError } = await admin.from("managed_comments")
+        .select("id").eq("id", commentId).eq("user_id", auth.user.id).single();
+      if (commentError || !managedComment) {
+        return Response.json({ error: "Managed comment not found." }, { status: 404 });
+      }
+      const rows = output.options.map((option) => ({
+        user_id: auth.user.id,
+        comment_id: commentId,
+        english_reply: option.replyEnglish,
+        native_reply: option.reply,
+        language: output.language,
+        tone,
+        risk: output.risk,
+      }));
+      const { data: drafts, error: draftError } = await admin.from("reply_drafts").insert(rows).select("id");
+      if (draftError) throw draftError;
+      await admin.from("managed_comments").update({ status: output.risk === "routine" ? "drafted" : "escalated", language: output.language, updated_at: new Date().toISOString() }).eq("id", commentId).eq("user_id", auth.user.id);
+      responseOutput = { ...output, options: output.options.map((option, index) => ({ ...option, draftId: drafts?.[index]?.id || null })) };
+    }
+
+    return Response.json(responseOutput, {
       headers: {
         "Cache-Control": "private, no-store",
         "X-RateLimit-Remaining": String(rate.remaining),

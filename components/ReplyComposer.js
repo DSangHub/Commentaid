@@ -4,13 +4,16 @@ import { useState } from "react";
 
 const tones = ["Warm", "Brief", "Helpful", "Professional", "Sales"];
 
-export default function ReplyComposer({ getAccessToken, initialComment = "" }) {
+export default function ReplyComposer({ getAccessToken, initialComment = "", initialCommentId = "" }) {
   const [comment, setComment] = useState(initialComment);
   const [context, setContext] = useState("");
   const [tone, setTone] = useState("Helpful");
   const [result, setResult] = useState(null);
   const [reply, setReply] = useState("");
   const [englishReply, setEnglishReply] = useState("");
+  const [draftId, setDraftId] = useState("");
+  const [posting, setPosting] = useState(false);
+  const [posted, setPosted] = useState(false);
   const [busy, setBusy] = useState(false);
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState("");
@@ -32,6 +35,7 @@ export default function ReplyComposer({ getAccessToken, initialComment = "" }) {
     setBusy(true);
     setError("");
     setCopied(false);
+    setPosted(false);
 
     try {
       const token = await getAccessToken();
@@ -41,13 +45,14 @@ export default function ReplyComposer({ getAccessToken, initialComment = "" }) {
           "content-type": "application/json",
           authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ comment, context, tone }),
+        body: JSON.stringify({ comment, commentId: initialCommentId, context, tone }),
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Reply generation failed.");
       setResult(data);
       setReply(data.options?.[0]?.reply || "");
       setEnglishReply(data.options?.[0]?.replyEnglish || "");
+      setDraftId(data.options?.[0]?.draftId || "");
     } catch (requestError) {
       setError(requestError.message || "Could not reach Commentaid AI.");
     } finally {
@@ -62,6 +67,27 @@ export default function ReplyComposer({ getAccessToken, initialComment = "" }) {
       window.setTimeout(() => setCopied(false), 1800);
     } catch {
       setError("Copy permission was unavailable. Select the reply and copy it manually.");
+    }
+  }
+
+  async function approveAndPost() {
+    if (!draftId || !initialCommentId) return;
+    setPosting(true);
+    setError("");
+    try {
+      const token = await getAccessToken();
+      const response = await fetch("/api/integrations/youtube/replies", {
+        method: "POST",
+        headers: { "content-type": "application/json", authorization: `Bearer ${token}` },
+        body: JSON.stringify({ draftId, nativeReply: reply }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Could not post the reply.");
+      setPosted(true);
+    } catch (postError) {
+      setError(postError.message || "Could not post the reply.");
+    } finally {
+      setPosting(false);
     }
   }
 
@@ -141,6 +167,7 @@ export default function ReplyComposer({ getAccessToken, initialComment = "" }) {
                 onClick={() => {
                   setReply(option.reply);
                   setEnglishReply(option.replyEnglish);
+                  setDraftId(option.draftId || "");
                   setCopied(false);
                 }}
               >
@@ -169,6 +196,11 @@ export default function ReplyComposer({ getAccessToken, initialComment = "" }) {
           <button className="button copyButton" type="button" onClick={copyReply} disabled={!reply}>
             {copied ? "Copied ✓" : "Copy reply"}
           </button>
+          {initialCommentId && draftId && (
+            <button className="button primary postButton" type="button" onClick={approveAndPost} disabled={posting || result.risk !== "routine"}>
+              {posting ? "Posting…" : posted ? "Posted to YouTube ✓" : result.risk === "routine" ? "Approve & post to YouTube" : "Human review required"}
+            </button>
+          )}
         </div>
       )}
     </section>
