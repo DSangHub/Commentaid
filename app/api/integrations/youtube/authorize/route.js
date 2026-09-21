@@ -9,12 +9,12 @@ export async function GET(request) {
   try {
     const state = new URL(request.url).searchParams.get("state");
     verifyOAuthState(state);
-    return NextResponse.redirect(youtubeAuthorizationUrl(state));
+    return NextResponse.redirect(youtubeAuthorizationUrl(state), { status: 302 });
   } catch (error) {
     console.error("YouTube authorize redirect error", error);
     const destination = new URL("/dashboard", request.url);
     destination.searchParams.set("youtube", "error");
     destination.searchParams.set("message", error.message || "Could not open Google authorization.");
-    return NextResponse.redirect(destination);
+    return NextResponse.redirect(destination, { status: 302 });
   }
 }
