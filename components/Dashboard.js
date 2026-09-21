@@ -25,6 +25,21 @@ export default function Dashboard() {
   const [youtubeAuthorizationUrl, setYoutubeAuthorizationUrl] = useState("");
 
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const result = params.get("youtube");
+    if (!result) return undefined;
+    const message = params.get("message");
+    const notice = result === "connected"
+      ? "YouTube connected successfully."
+      : result === "denied"
+        ? message || "Google access was not approved."
+        : message || "YouTube connection failed. Please try again.";
+    const timer = window.setTimeout(() => setIntegrationMessage(notice), 0);
+    window.history.replaceState({}, "", "/dashboard");
+    return () => window.clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
     if (!supabase) return undefined;
     let active = true;
     supabase.auth.getUser().then(({ data }) => {
