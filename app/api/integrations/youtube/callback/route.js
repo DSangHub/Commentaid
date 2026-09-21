@@ -6,14 +6,23 @@ import { encryptedTokenRecord, exchangeYouTubeCode, youtubeApi } from "../../../
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-function dashboardRedirect(request, result) {
+function dashboardRedirect(request, result, message = "") {
   const base = process.env.APP_URL || new URL(request.url).origin;
-  return NextResponse.redirect(new URL(`/dashboard?youtube=${result}`, base));
+  const destination = new URL("/dashboard", base);
+  destination.searchParams.set("youtube", result);
+  if (message) destination.searchParams.set("message", message);
+  return NextResponse.redirect(destination);
 }
 
 export async function GET(request) {
   const url = new URL(request.url);
-  if (url.searchParams.get("error")) return dashboardRedirect(request, "denied");
+  if (url.searchParams.get("error")) {
+    return dashboardRedirect(
+      request,
+      "denied",
+      url.searchParams.get("error_description") || "Google access was not approved."
+    );
+  }
   try {
     const { userId } = verifyOAuthState(url.searchParams.get("state"));
     const code = url.searchParams.get("code");
@@ -49,6 +58,6 @@ export async function GET(request) {
     return dashboardRedirect(request, "connected");
   } catch (error) {
     console.error("YouTube callback error", error);
-    return dashboardRedirect(request, "error");
+    return dashboardRedirect(request, "error", error.message || "YouTube connection failed.");
   }
 }
