@@ -1,6 +1,5 @@
 import { createOAuthState } from "../../../../../lib/crypto";
 import { requireUser } from "../../../../../lib/supabase";
-import { youtubeAuthorizationUrl } from "../../../../../lib/youtube-oauth";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -10,7 +9,9 @@ export async function POST(request) {
     const auth = await requireUser(request);
     if (auth.error) return Response.json({ error: auth.error }, { status: auth.status });
     const state = createOAuthState(auth.user.id);
-    return Response.json({ url: youtubeAuthorizationUrl(state, auth.user.email) }, {
+    const authorizeUrl = new URL("/api/integrations/youtube/authorize", request.url);
+    authorizeUrl.searchParams.set("state", state);
+    return Response.json({ url: authorizeUrl.toString() }, {
       headers: { "Cache-Control": "private, no-store" },
     });
   } catch (error) {
