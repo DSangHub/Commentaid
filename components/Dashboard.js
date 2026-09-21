@@ -22,6 +22,7 @@ export default function Dashboard() {
   const [managedFeed, setManagedFeed] = useState(null);
   const [integrationBusy, setIntegrationBusy] = useState(false);
   const [integrationMessage, setIntegrationMessage] = useState("");
+  const [youtubeAuthorizationUrl, setYoutubeAuthorizationUrl] = useState("");
 
   useEffect(() => {
     if (!supabase) return undefined;
@@ -71,14 +72,18 @@ export default function Dashboard() {
   async function connectYouTube() {
     setIntegrationBusy(true);
     setIntegrationMessage("");
+    setYoutubeAuthorizationUrl("");
     try {
       const token = await getAccessToken();
       const response = await fetch("/api/integrations/youtube/connect", { method: "POST", headers: { authorization: `Bearer ${token}` } });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Could not connect YouTube.");
-      window.location.assign(data.url);
+      if (!data.url) throw new Error("Google authorization URL was not returned.");
+      setYoutubeAuthorizationUrl(data.url);
+      setIntegrationMessage("Google authorization is ready. Continue to Google to approve access.");
     } catch (error) {
       setIntegrationMessage(error.message || "Could not connect YouTube.");
+    } finally {
       setIntegrationBusy(false);
     }
   }
@@ -165,7 +170,11 @@ export default function Dashboard() {
         ) : (
           <div className="integrationRow">
             <p>Authorize Commentaid to read comments and post only the replies you approve.</p>
-            <button className="button primary" type="button" onClick={connectYouTube} disabled={integrationBusy}>{integrationBusy ? "Opening Google…" : "Connect YouTube"}</button>
+            {youtubeAuthorizationUrl ? (
+              <a className="button primary" href={youtubeAuthorizationUrl}>Continue to Google</a>
+            ) : (
+              <button className="button primary" type="button" onClick={connectYouTube} disabled={integrationBusy}>{integrationBusy ? "Preparing Google…" : "Connect YouTube"}</button>
+            )}
           </div>
         )}
         {integrationMessage && <div className="banner" role="status">{integrationMessage}</div>}
