@@ -27,13 +27,21 @@ export default function Dashboard() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const result = params.get("youtube");
-    if (!result) return undefined;
-    const message = params.get("message");
-    const notice = result === "connected"
-      ? "YouTube connected successfully."
-      : result === "denied"
-        ? message || "Google access was not approved."
-        : message || "YouTube connection failed. Please try again.";
+    const onboarding = params.get("onboarding");
+
+    let notice = "";
+    if (result) {
+      const message = params.get("message");
+      notice = result === "connected"
+        ? "YouTube connected successfully."
+        : result === "denied"
+          ? message || "Google access was not approved."
+          : message || "YouTube connection failed. Please try again.";
+    } else if (onboarding === "youtube") {
+      notice = "Account created. Now connect your YouTube channel and approve access with Google.";
+    }
+
+    if (!notice) return undefined;
     const timer = window.setTimeout(() => setIntegrationMessage(notice), 0);
     window.history.replaceState({}, "", "/dashboard");
     return () => window.clearTimeout(timer);
