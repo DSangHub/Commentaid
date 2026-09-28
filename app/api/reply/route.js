@@ -31,10 +31,14 @@ const replySchema = z.object({
 function getModel() {
   if (process.env.OPENAI_API_KEY) {
     const openai = createOpenAI({ apiKey: process.env.OPENAI_API_KEY });
-    return openai(process.env.OPENAI_MODEL || "gpt-5.4-mini");
+    const configured = String(process.env.OPENAI_MODEL || "").trim();
+    const validModelName =
+      /^[a-z0-9][a-z0-9._:-]{2,100}$/i.test(configured) &&
+      !configured.startsWith("sk-");
+    return openai(validModelName ? configured : "gpt-5-mini");
   }
 
-  return process.env.AI_MODEL || "openai/gpt-5.4-mini";
+  return process.env.AI_MODEL || "openai/gpt-5-mini";
 }
 
 export async function POST(request) {
@@ -110,15 +114,22 @@ For spam or abuse, remain calm and do not intensify the exchange.`,
     });
   } catch (error) {
     console.error("Commentaid reply error", error);
-    const missingConfig = /Missing NEXT_PUBLIC_SUPABASE|API key|authentication/i.test(
-      error?.message || ""
-    );
+    const message = error?.message || "";
+    const missingConfig = /Missing NEXT_PUBLIC_SUPABASE|authentication/i.test(message);
+    const invalidKey = /invalid_api_key|incorrect api key|401 unauthorized/i.test(message);
+    const billing = /insufficient_quota|billing|credit balance|quota/i.test(message);
+    const invalidModel = /model.*not found|model.*does not exist|unsupported model/i.test(message);
+    const publicError = missingConfig
+      ? "Commentaid is not fully configured yet."
+      : invalidKey
+        ? "The OpenAI API key is invalid. Replace OPENAI_API_KEY in Vercel."
+        : billing
+          ? "OpenAI API billing or credits are required before replies can be generated."
+          : invalidModel
+            ? "OPENAI_MODEL is invalid. Set it to gpt-5-mini in Vercel."
+            : "The AI could not create a reply. Please try again.";
     return Response.json(
-      {
-        error: missingConfig
-          ? "Commentaid is not fully configured yet."
-          : "The AI could not create a reply. Please try again.",
-      },
+      { error: publicError },
       { status: missingConfig ? 503 : 500 }
     );
   }
