@@ -58,6 +58,22 @@ button:disabled { cursor: wait; opacity: .62; }
 .split h2 { font-size: clamp(32px,4vw,48px); margin-bottom: 20px; }
 .levels { display: flex; flex-wrap: wrap; gap: 10px; }
 .levels span { border: 1px solid #dcdfe6; background: var(--white); border-radius: 999px; padding: 12px 16px; font-weight: 700; }
+
+.pricingSection { padding-top: 70px; }
+.pricingSection > h2 { margin-bottom: 16px; }
+.pricingLead { max-width: 720px; margin: 0 0 34px; color: var(--muted); font-size: 17px; line-height: 1.6; }
+.pricingGrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; align-items: stretch; }
+.pricingCard { position: relative; display: flex; flex-direction: column; min-width: 0; padding: 28px; border: 1px solid var(--line); border-radius: 22px; background: var(--white); box-shadow: 0 10px 30px rgba(17,24,39,.05); }
+.pricingCard.featured { border-color: var(--violet); box-shadow: 0 16px 42px rgba(91,91,214,.16); }
+.planBadge { position: absolute; top: 16px; right: 16px; padding: 6px 9px; border-radius: 999px; background: var(--violet-soft); color: var(--violet); font-size: 10px; font-weight: 850; letter-spacing: 1px; }
+.planName { margin: 0 0 16px; font-size: 15px; font-weight: 850; }
+.price { min-height: 50px; display: flex; align-items: baseline; gap: 6px; }
+.price span { font-size: 36px; font-weight: 850; letter-spacing: -1.8px; }
+.price small { color: var(--muted); font-weight: 700; }
+.planSummary { min-height: 70px; margin: 14px 0; color: var(--muted); line-height: 1.5; }
+.pricingCard ul { flex: 1; margin: 4px 0 24px; padding-left: 20px; color: #3f4652; line-height: 1.55; }
+.pricingCard li + li { margin-top: 9px; }
+.pricingNote { margin: 20px 0 0; color: var(--muted); font-size: 13px; line-height: 1.55; }
 .cta { max-width: 1124px; margin: 30px auto 70px; padding: 54px; background: var(--ink); color: var(--white); border-radius: 28px; display: flex; justify-content: space-between; gap: 28px; align-items: center; }
 .cta h2 { margin-bottom: 14px; }
 .cta p { color: #cbd5e1; max-width: 650px; }
@@ -124,9 +140,14 @@ textarea { resize: vertical; line-height: 1.5; }
 .commentActions { display: flex; justify-content: space-between; align-items: center; gap: 12px; color: var(--violet); font-size: 13px; font-weight: 750; }
 .emptyState { text-align: center; color: var(--muted); padding: 40px 10px; }
 
+@media (max-width: 1050px) {
+  .pricingGrid { grid-template-columns: repeat(2, 1fr); }
+}
+
 @media (max-width: 800px) {
   .hero h1 { letter-spacing: -3px; }
-  .grid, .split, .replyOptions, .composerGrid { grid-template-columns: 1fr; }
+  .grid, .split, .pricingGrid, .replyOptions, .composerGrid { grid-template-columns: 1fr; }
+  .planSummary { min-height: 0; }
   .integrationRow { align-items: stretch; flex-direction: column; }
   .postButton { margin-left: 0; }
   .cta { margin-left: 18px; margin-right: 18px; flex-direction: column; align-items: flex-start; }
