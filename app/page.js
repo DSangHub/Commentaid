@@ -7,6 +7,7 @@ export default function Home() {
         <div className="brand">Commentaid</div>
         <div className="navActions">
           <a className="navLink" href="#how">How it works</a>
+          <a className="navLink" href="#pricing">Pricing</a>
           <Link className="button primary compact" href="/login">Open Commentaid</Link>
         </div>
       </nav>
@@ -48,6 +49,63 @@ export default function Home() {
       <section className="split">
         <div><p className="eyebrow">FOR INFLUENCERS</p><h2>Your audience is global. Your language doesn&apos;t have to be.</h2><p>Answer international viewers faster and find comments that can become affiliate sales, memberships, or loyal followers.</p></div>
         <div><p className="eyebrow">FOR BUSINESSES</p><h2>Every comment can become a customer interaction.</h2><p>Handle routine questions, discover leads, and send sensitive complaints to a person for review.</p></div>
+      </section>
+
+      <section id="pricing" className="section pricingSection">
+        <p className="eyebrow">SIMPLE MONTHLY PRICING</p>
+        <h2>Start free. Grow when your audience does.</h2>
+        <p className="pricingLead">An interaction is one comment processed with AI, including its translation, analysis, and reply draft.</p>
+        <div className="pricingGrid">
+          <article className="pricingCard">
+            <p className="planName">Free</p>
+            <div className="price"><span>$0</span></div>
+            <p className="planSummary">Try Commentaid before choosing a paid plan.</p>
+            <ul>
+              <li>10 AI comment interactions</li>
+              <li>Translation and reply drafts</li>
+              <li>You approve every posted reply</li>
+            </ul>
+            <Link className="button secondary wide" href="/login?mode=signup&amp;next=%2Fdashboard%3Fonboarding%3Dyoutube">Start free</Link>
+          </article>
+
+          <article className="pricingCard featured">
+            <span className="planBadge">POPULAR</span>
+            <p className="planName">Creator</p>
+            <div className="price"><span>$9.95</span><small>/month</small></div>
+            <p className="planSummary">For creators building an engaged community.</p>
+            <ul>
+              <li>100 AI comment interactions</li>
+              <li>Email communication with the creator</li>
+              <li>Approval-based reply workflow</li>
+            </ul>
+            <Link className="button primary wide" href="/login?mode=signup&amp;next=%2Fdashboard%3Fonboarding%3Dyoutube">Choose Creator</Link>
+          </article>
+
+          <article className="pricingCard">
+            <p className="planName">Unlimited</p>
+            <div className="price"><span>$19.95</span><small>/month</small></div>
+            <p className="planSummary">For active channels with a steady comment volume.</p>
+            <ul>
+              <li>Unlimited AI comment interactions</li>
+              <li>Connected-channel management</li>
+              <li>AI drafts with creator approval</li>
+            </ul>
+            <Link className="button secondary wide" href="/login?mode=signup&amp;next=%2Fdashboard%3Fonboarding%3Dyoutube">Choose Unlimited</Link>
+          </article>
+
+          <article className="pricingCard">
+            <p className="planName">Large Accounts</p>
+            <div className="price"><span>$49.95</span><small>/month</small></div>
+            <p className="planSummary">For high-volume creators and businesses.</p>
+            <ul>
+              <li>Unlimited comments</li>
+              <li>Instant AI replies</li>
+              <li>Text communication in the U.S.</li>
+            </ul>
+            <Link className="button secondary wide" href="/login?mode=signup&amp;next=%2Fdashboard%3Fonboarding%3Dyoutube">Choose Large Accounts</Link>
+          </article>
+        </div>
+        <p className="pricingNote">All paid plans are billed monthly. Channel owners authorize access through Google and remain in control of their connection.</p>
       </section>
 
       <section className="section authority">
