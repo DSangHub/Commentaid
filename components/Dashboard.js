@@ -175,7 +175,7 @@ export default function Dashboard() {
             <p className="eyebrow">MANAGED ACCOUNTS</p>
             <h2 id="youtube-connect-title">YouTube connection</h2>
           </div>
-          <span className="statusDot">Approval required</span>
+          <span className="statusDot">{youtubeAccounts.length ? "Connected" : "Not connected"}</span>
         </div>
         {youtubeAccounts.length ? (
           <div className="integrationRow">
