@@ -19,7 +19,7 @@ export default function Home() {
           answer, and act on comments—in the viewer&apos;s own language.
         </p>
         <div className="actions">
-          <Link href="/login" className="button primary">Start managing comments</Link>
+          <Link href="/login?mode=signup&amp;next=%2Fdashboard%3Fonboarding%3Dyoutube" className="button primary">Create account &amp; connect YouTube</Link>
           <a href="#how" className="button secondary">See how it works</a>
         </div>
 
