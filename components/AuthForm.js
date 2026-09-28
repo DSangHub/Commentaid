@@ -5,13 +5,18 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createBrowserSupabase } from "../lib/supabase";
 
-export default function AuthForm() {
+export default function AuthForm({ initialMode = "signin", nextPath = "/dashboard" }) {
   const router = useRouter();
-  const [mode, setMode] = useState("signin");
+  const [mode, setMode] = useState(initialMode === "signup" ? "signup" : "signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
+
+  const destination =
+    typeof nextPath === "string" && nextPath.startsWith("/") && !nextPath.startsWith("//")
+      ? nextPath
+      : "/dashboard";
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -28,10 +33,10 @@ export default function AuthForm() {
       if (result.error) throw result.error;
 
       if (mode === "signup" && !result.data.session) {
-        setMessage("Check your email to confirm your account, then sign in.");
+        setMessage("Check your email to confirm your account, then return here and sign in to connect your channel.");
         setMode("signin");
       } else {
-        router.replace("/dashboard");
+        router.replace(destination);
       }
     } catch (error) {
       setMessage(error.message || "Unable to continue. Please try again.");
@@ -51,7 +56,7 @@ export default function AuthForm() {
         <p className="authSub">
           {mode === "signin"
             ? "Sign in to manage comments and multilingual replies."
-            : "Start turning comments into conversations."}
+            : "Create your account, then securely authorize access to your YouTube channel."}
         </p>
 
         <form className="authForm" onSubmit={handleSubmit}>
@@ -85,7 +90,7 @@ export default function AuthForm() {
               ? "Please wait…"
               : mode === "signin"
                 ? "Sign in"
-                : "Create account"}
+                : "Create account & continue"}
           </button>
         </form>
 
