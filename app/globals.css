@@ -129,6 +129,10 @@ textarea { resize: vertical; line-height: 1.5; }
 .postButton { margin: 10px 0 0 10px; }
 .integrationRow { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
 .integrationRow p { margin: 6px 0; color: var(--muted); }
+.billingSummary { display: flex; align-items: center; justify-content: space-between; gap: 22px; }
+.billingSummary p { margin: 7px 0 0; color: var(--muted); }
+.billingActions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+.billingContinue { margin-top: 18px; }
 .channelForm { display: grid; grid-template-columns: 1fr auto; gap: 10px; }
 .channelSummary { margin-top: 20px; display: flex; justify-content: space-between; gap: 12px; padding: 14px 0; border-bottom: 1px solid var(--line); color: var(--muted); }
 .channelSummary strong { color: var(--ink); }
@@ -149,6 +153,8 @@ textarea { resize: vertical; line-height: 1.5; }
   .grid, .split, .pricingGrid, .replyOptions, .composerGrid { grid-template-columns: 1fr; }
   .planSummary { min-height: 0; }
   .integrationRow { align-items: stretch; flex-direction: column; }
+  .billingSummary { align-items: stretch; flex-direction: column; }
+  .billingActions { justify-content: flex-start; }
   .postButton { margin-left: 0; }
   .cta { margin-left: 18px; margin-right: 18px; flex-direction: column; align-items: flex-start; }
   footer { flex-direction: column; }

@@ -23,11 +23,17 @@ export default function Dashboard() {
   const [integrationBusy, setIntegrationBusy] = useState(false);
   const [integrationMessage, setIntegrationMessage] = useState("");
   const [youtubeAuthorizationUrl, setYoutubeAuthorizationUrl] = useState("");
+  const [billingStatus, setBillingStatus] = useState(null);
+  const [billingBusy, setBillingBusy] = useState(false);
+  const [billingMessage, setBillingMessage] = useState("");
+  const [pendingPlan, setPendingPlan] = useState("");
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const result = params.get("youtube");
     const onboarding = params.get("onboarding");
+    const billing = params.get("billing");
+    const plan = params.get("plan");
 
     let notice = "";
     if (result) {
@@ -41,9 +47,18 @@ export default function Dashboard() {
       notice = "Account created. Now connect your YouTube channel and approve access with Google.";
     }
 
-    if (!notice) return undefined;
-    const timer = window.setTimeout(() => setIntegrationMessage(notice), 0);
-    window.history.replaceState({}, "", "/dashboard");
+    const timer = window.setTimeout(() => {
+      if (notice) setIntegrationMessage(notice);
+      if (["creator", "unlimited", "large"].includes(plan)) {
+        setPendingPlan(plan);
+        setBillingMessage("Your account is ready. Continue to Stripe to activate your selected plan.");
+      } else if (billing === "success") {
+        setBillingMessage("Payment received. Your plan will update as soon as Stripe confirms the subscription.");
+      } else if (billing === "cancelled") {
+        setBillingMessage("Checkout was cancelled. Your current plan has not changed.");
+      }
+    }, 0);
+    if (notice || billing || plan) window.history.replaceState({}, "", "/dashboard");
     return () => window.clearTimeout(timer);
   }, []);
 
@@ -86,11 +101,60 @@ export default function Dashboard() {
     }
   }, [getAccessToken]);
 
+  const loadBillingStatus = useCallback(async () => {
+    try {
+      const token = await getAccessToken();
+      const response = await fetch("/api/billing/status", { headers: { authorization: `Bearer ${token}` } });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Could not check billing status.");
+      setBillingStatus(data);
+    } catch (error) {
+      setBillingMessage(error.message || "Could not check billing status.");
+    }
+  }, [getAccessToken]);
+
   useEffect(() => {
     if (!user) return undefined;
-    const timer = window.setTimeout(() => loadYouTubeStatus(), 0);
+    const timer = window.setTimeout(() => {
+      loadYouTubeStatus();
+      loadBillingStatus();
+    }, 0);
     return () => window.clearTimeout(timer);
-  }, [user, loadYouTubeStatus]);
+  }, [user, loadYouTubeStatus, loadBillingStatus]);
+
+  async function startCheckout(plan) {
+    setBillingBusy(true);
+    setBillingMessage("");
+    try {
+      const token = await getAccessToken();
+      const response = await fetch("/api/billing/checkout", {
+        method: "POST",
+        headers: { "content-type": "application/json", authorization: `Bearer ${token}` },
+        body: JSON.stringify({ plan }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Checkout could not be started.");
+      window.location.assign(data.url);
+    } catch (error) {
+      setBillingMessage(error.message || "Checkout could not be started.");
+      setBillingBusy(false);
+    }
+  }
+
+  async function manageBilling() {
+    setBillingBusy(true);
+    setBillingMessage("");
+    try {
+      const token = await getAccessToken();
+      const response = await fetch("/api/billing/portal", { method: "POST", headers: { authorization: `Bearer ${token}` } });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "The billing portal could not be opened.");
+      window.location.assign(data.url);
+    } catch (error) {
+      setBillingMessage(error.message || "The billing portal could not be opened.");
+      setBillingBusy(false);
+    }
+  }
 
   async function connectYouTube() {
     setIntegrationBusy(true);
@@ -177,6 +241,39 @@ export default function Dashboard() {
         <p>Manage multilingual comments from any post or ad through one AI bridge.</p>
       </header>
 
+      <section className="workspaceCard billingCard" aria-labelledby="billing-title">
+        <div className="cardHeading">
+          <div>
+            <p className="eyebrow">PLAN &amp; USAGE</p>
+            <h2 id="billing-title">{billingStatus?.planName || "Loading plan…"}</h2>
+          </div>
+          {billingStatus && <span className="statusDot">{billingStatus.status}</span>}
+        </div>
+        {billingStatus && (
+          <div className="billingSummary">
+            <div>
+              <strong>{billingStatus.limit === null ? "Unlimited AI interactions" : `${billingStatus.used} of ${billingStatus.limit} AI interactions used`}</strong>
+              <p>{billingStatus.remaining === null ? "No monthly interaction cap." : `${billingStatus.remaining} remaining in this period.`}</p>
+            </div>
+            {billingStatus.canManageBilling && billingStatus.plan !== "free" ? (
+              <button className="button secondary" type="button" onClick={manageBilling} disabled={billingBusy}>Manage billing</button>
+            ) : (
+              <div className="billingActions">
+                <button className="miniButton accent" type="button" onClick={() => startCheckout("creator")} disabled={billingBusy}>Creator $9.95</button>
+                <button className="miniButton accent" type="button" onClick={() => startCheckout("unlimited")} disabled={billingBusy}>Unlimited $19.95</button>
+                <button className="miniButton accent" type="button" onClick={() => startCheckout("large")} disabled={billingBusy}>Large $49.95</button>
+              </div>
+            )}
+          </div>
+        )}
+        {pendingPlan && billingStatus?.plan === "free" && (
+          <button className="button primary billingContinue" type="button" onClick={() => startCheckout(pendingPlan)} disabled={billingBusy}>
+            {billingBusy ? "Opening secure checkout…" : "Continue to secure checkout"}
+          </button>
+        )}
+        {billingMessage && <div className="banner" role="status">{billingMessage}</div>}
+      </section>
+
       <section className="workspaceCard integrationCard" aria-labelledby="youtube-connect-title">
         <div className="cardHeading">
           <div>
@@ -203,7 +300,7 @@ export default function Dashboard() {
         {integrationMessage && <div className="banner" role="status">{integrationMessage}</div>}
       </section>
 
-      <ReplyComposer key={selectedComment.id || selectedComment.text || "manual"} getAccessToken={getAccessToken} initialComment={selectedComment.text} initialCommentId={selectedComment.id} />
+      <ReplyComposer key={selectedComment.id || selectedComment.text || "manual"} getAccessToken={getAccessToken} initialComment={selectedComment.text} initialCommentId={selectedComment.id} onUsageChange={loadBillingStatus} />
 
       {managedFeed?.comments?.length > 0 && (
         <section className="workspaceCard" aria-labelledby="managed-comments-title">

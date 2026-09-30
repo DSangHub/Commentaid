@@ -4,7 +4,7 @@ import { useState } from "react";
 
 const tones = ["Warm", "Brief", "Helpful", "Professional", "Sales"];
 
-export default function ReplyComposer({ getAccessToken, initialComment = "", initialCommentId = "" }) {
+export default function ReplyComposer({ getAccessToken, initialComment = "", initialCommentId = "", onUsageChange }) {
   const [comment, setComment] = useState(initialComment);
   const [context, setContext] = useState("");
   const [tone, setTone] = useState("Helpful");
@@ -53,6 +53,7 @@ export default function ReplyComposer({ getAccessToken, initialComment = "", ini
       setReply(data.options?.[0]?.reply || "");
       setEnglishReply(data.options?.[0]?.replyEnglish || "");
       setDraftId(data.options?.[0]?.draftId || "");
+      if (onUsageChange) onUsageChange();
     } catch (requestError) {
       setError(requestError.message || "Could not reach Commentaid AI.");
     } finally {
