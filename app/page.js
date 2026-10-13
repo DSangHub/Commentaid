@@ -78,7 +78,7 @@ export default function Home() {
               <li>Email communication with the creator</li>
               <li>Approval-based reply workflow</li>
             </ul>
-            <Link className="button primary wide" href="/login?mode=signup&amp;next=%2Fdashboard%3Fonboarding%3Dyoutube">Choose Creator</Link>
+            <Link className="button primary wide" href="/login?mode=signup&amp;next=%2Fdashboard%3Fplan%3Dcreator">Choose Creator</Link>
           </article>
 
           <article className="pricingCard">
@@ -90,7 +90,7 @@ export default function Home() {
               <li>Connected-channel management</li>
               <li>AI drafts with creator approval</li>
             </ul>
-            <Link className="button secondary wide" href="/login?mode=signup&amp;next=%2Fdashboard%3Fonboarding%3Dyoutube">Choose Unlimited</Link>
+            <Link className="button secondary wide" href="/login?mode=signup&amp;next=%2Fdashboard%3Fplan%3Dunlimited">Choose Unlimited</Link>
           </article>
 
           <article className="pricingCard">
@@ -102,7 +102,7 @@ export default function Home() {
               <li>Instant AI replies</li>
               <li>Text communication in the U.S.</li>
             </ul>
-            <Link className="button secondary wide" href="/login?mode=signup&amp;next=%2Fdashboard%3Fonboarding%3Dyoutube">Choose Large Accounts</Link>
+            <Link className="button secondary wide" href="/login?mode=signup&amp;next=%2Fdashboard%3Fplan%3Dlarge">Choose Large Accounts</Link>
           </article>
         </div>
         <p className="pricingNote">All paid plans are billed monthly. Channel owners authorize access through Google and remain in control of their connection.</p>
