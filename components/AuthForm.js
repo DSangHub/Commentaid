@@ -56,7 +56,7 @@ export default function AuthForm({ initialMode = "signin", nextPath = "/dashboar
         <p className="authSub">
           {mode === "signin"
             ? "Sign in to manage comments and multilingual replies."
-            : "Create your account, then securely authorize access to your YouTube channel."}
+            : "Create an account to let Commentaid help manage your comments. Next, connect your YouTube channel and authorize access through Google. Review AI replies in English and approve them before posting."}
         </p>
 
         <form className="authForm" onSubmit={handleSubmit}>
