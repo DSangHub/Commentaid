@@ -1,11 +1,13 @@
 import Link from "next/link";
+import LanguageToggle from "./LanguageToggle";
 
 export default function Home() {
   return (
-    <main>
+    <main id="commentaid-home">
       <nav className="nav">
         <div className="brand">Commentaid</div>
         <div className="navActions">
+          <LanguageToggle />
           <a className="navLink" href="#how">How it works</a>
           <a className="navLink" href="#pricing">Pricing</a>
           <Link className="button primary compact" href="/login?mode=signup&next=%2Fdashboard%3Fonboarding%3Dyoutube">Open Commentaid</Link>
