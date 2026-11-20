@@ -3,11 +3,13 @@
 import { useState } from "react";
 
 const tones = ["Warm", "Brief", "Helpful", "Professional", "Sales"];
+const replyLanguages = [["original","Same as commenter"],["en","English"],["es","Spanish"],["fr","French"],["pt","Portuguese"],["de","German"],["it","Italian"],["nl","Dutch"],["ar","Arabic"],["hi","Hindi"],["ur","Urdu"],["pa","Punjabi"],["id","Indonesian"],["zh","Chinese"],["ja","Japanese"],["ko","Korean"],["vi","Vietnamese"],["th","Thai"],["tr","Turkish"],["ru","Russian"],["bn","Bengali"],["sw","Swahili"],["tl","Filipino"],["ta","Tamil"],["te","Telugu"]];
 
 export default function ReplyComposer({ getAccessToken, initialComment = "", initialCommentId = "", onUsageChange }) {
   const [comment, setComment] = useState(initialComment);
   const [context, setContext] = useState("");
   const [tone, setTone] = useState("Helpful");
+  const [replyLanguage, setReplyLanguage] = useState("original");
   const [result, setResult] = useState(null);
   const [reply, setReply] = useState("");
   const [englishReply, setEnglishReply] = useState("");
@@ -45,7 +47,7 @@ export default function ReplyComposer({ getAccessToken, initialComment = "", ini
           "content-type": "application/json",
           authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ comment, commentId: initialCommentId, context, tone }),
+        body: JSON.stringify({ comment, commentId: initialCommentId, context, tone, replyLanguage }),
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Reply generation failed.");
@@ -121,6 +123,12 @@ export default function ReplyComposer({ getAccessToken, initialComment = "", ini
 
         <div className="composerGrid">
           <div>
+            <label htmlFor="reply-language">Translate reply into</label>
+            <select id="reply-language" value={replyLanguage} onChange={(event) => setReplyLanguage(event.target.value)}>
+              {replyLanguages.map(([code, label]) => <option key={code} value={code}>{label}</option>)}
+            </select>
+          </div>
+          <div>
             <label htmlFor="tone">Reply tone</label>
             <select id="tone" value={tone} onChange={(event) => setTone(event.target.value)}>
               {tones.map((option) => <option key={option}>{option}</option>)}
@@ -148,7 +156,8 @@ export default function ReplyComposer({ getAccessToken, initialComment = "", ini
       {result && (
         <div className="resultPanel">
           <div className="resultChips">
-            <span>{result.language}</span>
+            <span>Detected: {result.language}</span>
+            <span>Reply: {result.replyLanguage || result.language}</span>
             <span>{result.intent}</span>
             {result.risk !== "routine" && <span className="riskChip">Human review: {result.risk}</span>}
           </div>
@@ -174,7 +183,7 @@ export default function ReplyComposer({ getAccessToken, initialComment = "", ini
               >
                 <strong>{option.style}</strong>
                 <span className="draftEnglish">English: {option.replyEnglish}</span>
-                <span className="draftNative">{result.language}: {option.reply}</span>
+                <span className="draftNative">{result.replyLanguage || result.language}: {option.reply}</span>
               </button>
             ))}
           </div>
@@ -184,7 +193,7 @@ export default function ReplyComposer({ getAccessToken, initialComment = "", ini
             <p>{englishReply}</p>
           </div>
 
-          <label htmlFor="final-reply">Edit, then copy the native-language reply</label>
+          <label htmlFor="final-reply">Edit, then copy the translated reply</label>
           <textarea
             id="final-reply"
             rows={4}
