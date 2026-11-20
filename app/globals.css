@@ -62,7 +62,7 @@ button:disabled { cursor: wait; opacity: .62; }
 .pricingSection { padding-top: 70px; }
 .pricingSection > h2 { margin-bottom: 16px; }
 .pricingLead { max-width: 720px; margin: 0 0 34px; color: var(--muted); font-size: 17px; line-height: 1.6; }
-.pricingGrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; align-items: stretch; }
+.pricingGrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; align-items: stretch; }
 .pricingCard { position: relative; display: flex; flex-direction: column; min-width: 0; padding: 28px; border: 1px solid var(--line); border-radius: 22px; background: var(--white); box-shadow: 0 10px 30px rgba(17,24,39,.05); }
 .pricingCard.featured { border-color: var(--violet); box-shadow: 0 16px 42px rgba(91,91,214,.16); }
 .planBadge { position: absolute; top: 16px; right: 16px; padding: 6px 9px; border-radius: 999px; background: var(--violet-soft); color: var(--violet); font-size: 10px; font-weight: 850; letter-spacing: 1px; }
@@ -170,3 +170,5 @@ textarea { resize: vertical; line-height: 1.5; }
 .languageControl { display:inline-flex; align-items:center; gap:6px; background:#fff; border:1px solid #dde1e9; border-radius:999px; padding:4px 10px; white-space:nowrap; }
 .languageControl select { width:auto; max-width:170px; border:0; box-shadow:none; background:transparent; padding:6px 2px; font-size:13px; font-weight:700; }
 @media(max-width:800px){.navActions{gap:8px;flex-wrap:wrap;justify-content:flex-end}.languageControl select{max-width:110px}.nav .button.compact{font-size:12px;padding:9px 11px}}
+
+.annualPrice { margin: 0 0 10px; font-size: 14px; font-weight: 750; color: var(--violet); }
