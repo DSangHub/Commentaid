@@ -20,16 +20,18 @@ const translations = {
  ko:["이용 방법","요금","Commentaid 열기","댓글을 대화로 바꾸세요.","크리에이터와 기업이 시청자의 언어로 댓글을 이해하고 번역하고 답하도록 돕는 AI 도우미입니다.","계정 만들고 YouTube 연결","이용 방법 보기","무료로 시작하고 시청자와 함께 성장하세요.","모든 댓글은 답변받을 가치가 있습니다."]
 };
 const originals=["How it works","Pricing","Open Commentaid","Turn comments into conversations.","One AI bridge for influencers and businesses to understand, translate, answer, and act on comments—in the viewer's own language.","Create account & connect YouTube","See how it works","Start free. Grow when your audience does.","Every comment deserves an answer."];
-const country = {MX:"es",ES:"es",CO:"es",AR:"es",PE:"es",CL:"es",FR:"fr",BR:"pt",PT:"pt",IN:"hi",PK:"ur",ID:"id",SA:"ar",AE:"ar",EG:"ar",CN:"zh",TW:"zh",JP:"ja",KR:"ko"};
-function chooseLanguage(){
+const country = {US:"en",CA:"en",GB:"en",AU:"en",NZ:"en",IE:"en",DE:"en",IT:"en",NL:"en",BE:"fr",CH:"fr",AT:"en",PH:"en",NG:"en",ZA:"en",MY:"en",SG:"en",VN:"en",TH:"en",BD:"en",NP:"hi",LK:"en",MA:"ar",DZ:"ar",TN:"ar",TR:"en",MX:"es",ES:"es",CO:"es",AR:"es",PE:"es",CL:"es",FR:"fr",BR:"pt",PT:"pt",IN:"hi",PK:"ur",ID:"id",SA:"ar",AE:"ar",EG:"ar",CN:"zh",TW:"zh",JP:"ja",KR:"ko"};
+function chooseLanguage(initialCountry){
  try {const saved=localStorage.getItem("commentaid-language");if(saved && languages.some(([c])=>c===saved))return saved;}catch{}
+ const countryLanguage=country[String(initialCountry||"").toUpperCase()];
+ if(countryLanguage && languages.some(([c])=>c===countryLanguage))return countryLanguage;
  const browser=navigator.languages||[navigator.language];
  for(const item of browser){const code=item.toLowerCase().split("-")[0];if(languages.some(([c])=>c===code))return code;}
  return "en";
 }
-export default function LanguageToggle(){
+export default function LanguageToggle({ initialCountry = "" }){
  const [lang,setLang]=useState("en");
- useEffect(()=>{setLang(chooseLanguage());},[]);
+ useEffect(()=>{setLang(chooseLanguage(initialCountry));},[]);
  useEffect(()=>{
   const root=document.getElementById("commentaid-home");
   if(!root)return;
