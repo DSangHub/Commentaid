@@ -1,13 +1,16 @@
 import Link from "next/link";
+import { headers } from "next/headers";
 import LanguageToggle from "./LanguageToggle";
 
-export default function Home() {
+export default async function Home() {
+  const requestHeaders = await headers();
+  const visitorCountry = requestHeaders.get("x-vercel-ip-country") || "";
   return (
     <main id="commentaid-home">
       <nav className="nav">
         <div className="brand">Commentaid</div>
         <div className="navActions">
-          <LanguageToggle />
+          <LanguageToggle initialCountry={visitorCountry} />
           <a className="navLink" href="#how">How it works</a>
           <a className="navLink" href="#pricing">Pricing</a>
           <Link className="button primary compact" href="/login?mode=signup&next=%2Fdashboard%3Fonboarding%3Dyoutube">Open Commentaid</Link>
