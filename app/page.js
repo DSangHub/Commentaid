@@ -73,7 +73,8 @@ export default function Home() {
           <article className="pricingCard featured">
             <span className="planBadge">POPULAR</span>
             <p className="planName">Creator</p>
-            <div className="price"><span>$9.95</span><small>/month</small></div>
+            <div className="price"><span>$2.99</span><small>/month</small></div>
+            <p className="annualPrice">or $19.95/year</p>
             <p className="planSummary">For creators building an engaged community.</p>
             <ul>
               <li>100 AI comment interactions</li>
@@ -85,7 +86,8 @@ export default function Home() {
 
           <article className="pricingCard">
             <p className="planName">Unlimited</p>
-            <div className="price"><span>$19.95</span><small>/month</small></div>
+            <div className="price"><span>$9.95</span><small>/month</small></div>
+            <p className="annualPrice">or $99.00/year</p>
             <p className="planSummary">For active channels with a steady comment volume.</p>
             <ul>
               <li>Unlimited AI comment interactions</li>
@@ -95,19 +97,8 @@ export default function Home() {
             <Link className="button secondary wide" href="/login?mode=signup&amp;next=%2Fdashboard%3Fplan%3Dunlimited">Choose Unlimited</Link>
           </article>
 
-          <article className="pricingCard">
-            <p className="planName">Large Accounts</p>
-            <div className="price"><span>$49.95</span><small>/month</small></div>
-            <p className="planSummary">For high-volume creators and businesses.</p>
-            <ul>
-              <li>Unlimited comments</li>
-              <li>Instant AI replies</li>
-              <li>Text communication in the U.S.</li>
-            </ul>
-            <Link className="button secondary wide" href="/login?mode=signup&amp;next=%2Fdashboard%3Fplan%3Dlarge">Choose Large Accounts</Link>
-          </article>
         </div>
-        <p className="pricingNote">All paid plans are billed monthly. Channel owners authorize access through Google and remain in control of their connection.</p>
+        <p className="pricingNote">Monthly and annual pricing shown; subscription checkout must be configured for the selected billing period. Channel owners authorize access through Google and remain in control of their connection.</p>
       </section>
 
       <section className="section authority">
