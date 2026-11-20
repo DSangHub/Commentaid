@@ -165,3 +165,8 @@ textarea { resize: vertical; line-height: 1.5; }
   .channelForm { grid-template-columns: 1fr; }
   .statusDot { white-space: normal; }
 }
+
+/* Landing language selector */
+.languageControl { display:inline-flex; align-items:center; gap:6px; background:#fff; border:1px solid #dde1e9; border-radius:999px; padding:4px 10px; white-space:nowrap; }
+.languageControl select { width:auto; max-width:170px; border:0; box-shadow:none; background:transparent; padding:6px 2px; font-size:13px; font-weight:700; }
+@media(max-width:800px){.navActions{gap:8px;flex-wrap:wrap;justify-content:flex-end}.languageControl select{max-width:110px}.nav .button.compact{font-size:12px;padding:9px 11px}}
