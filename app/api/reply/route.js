@@ -65,6 +65,9 @@ export async function POST(request) {
     const context = typeof body.context === "string" ? body.context.trim() : "";
     const tone = typeof body.tone === "string" ? body.tone.trim() : "Helpful";
     const commentId = typeof body.commentId === "string" ? body.commentId : "";
+    const languageChoices = { en:"English", es:"Spanish", fr:"French", pt:"Portuguese", de:"German", it:"Italian", nl:"Dutch", ar:"Arabic", hi:"Hindi", ur:"Urdu", pa:"Punjabi", id:"Indonesian", zh:"Chinese", ja:"Japanese", ko:"Korean", vi:"Vietnamese", th:"Thai", tr:"Turkish", ru:"Russian", bn:"Bengali", sw:"Swahili", tl:"Filipino", ta:"Tamil", te:"Telugu" };
+    const replyLanguage = typeof body.replyLanguage === "string" && Object.hasOwn(languageChoices, body.replyLanguage) ? body.replyLanguage : "original";
+    const targetLanguage = replyLanguage === "original" ? "the commenter’s original language" : languageChoices[replyLanguage];
 
     if (!comment || comment.length > 3000) {
       return Response.json(
@@ -93,7 +96,7 @@ export async function POST(request) {
       output: Output.object({ schema: replySchema }),
       system: `You are Commentaid, a multilingual comment-response assistant for creators and businesses.
 Detect the comment's language and translate it naturally into English.
-Draft exactly three useful replies in the commenter's original language, with an English rendering of each.
+Draft exactly three useful replies in ${targetLanguage}, with an English rendering of each. The language field must describe the original comment language.
 Keep replies concise, culturally respectful, and faithful to the requested tone.
 Never invent prices, availability, policies, links, promises, refunds, or business facts.
 Use supplied business context only when relevant.
@@ -102,7 +105,7 @@ For spam or abuse, remain calm and do not intensify the exchange.`,
       prompt: `Requested tone: ${tone}\nBusiness context: ${context || "None provided"}\nComment: ${comment}`,
     });
 
-    let responseOutput = output;
+    let responseOutput = { ...output, replyLanguage: targetLanguage === "the commenter’s original language" ? output.language : targetLanguage };
     if (commentId) {
       const { data: managedComment, error: commentError } = await billingAdmin.from("managed_comments")
         .select("id").eq("id", commentId).eq("user_id", auth.user.id).single();
@@ -116,14 +119,14 @@ For spam or abuse, remain calm and do not intensify the exchange.`,
         comment_id: commentId,
         english_reply: option.replyEnglish,
         native_reply: option.reply,
-        language: output.language,
+        language: responseOutput.replyLanguage,
         tone,
         risk: output.risk,
       }));
       const { data: drafts, error: draftError } = await billingAdmin.from("reply_drafts").insert(rows).select("id");
       if (draftError) throw draftError;
       await billingAdmin.from("managed_comments").update({ status: output.risk === "routine" ? "drafted" : "escalated", language: output.language, updated_at: new Date().toISOString() }).eq("id", commentId).eq("user_id", auth.user.id);
-      responseOutput = { ...output, options: output.options.map((option, index) => ({ ...option, draftId: drafts?.[index]?.id || null })) };
+      responseOutput = { ...responseOutput, options: output.options.map((option, index) => ({ ...option, draftId: drafts?.[index]?.id || null })) };
     }
 
     return Response.json({ ...responseOutput, usage: reservation }, {
