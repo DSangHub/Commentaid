@@ -13,7 +13,7 @@ export default async function Home() {
           <LanguageToggle initialCountry={visitorCountry} />
           <a className="navLink" href="#how">How it works</a>
           <a className="navLink" href="#pricing">Pricing</a>
-          <Link className="button primary compact" href="/login?mode=signup&next=%2Fdashboard%3Fonboarding%3Dyoutube">Open Commentaid</Link>
+          <Link className="button primary compact" href="/login?mode=signup&next=%2Fdashboard">Open Commentaid</Link>
         </div>
       </nav>
 
@@ -25,7 +25,7 @@ export default async function Home() {
           answer, and act on comments—in the viewer&apos;s own language.
         </p>
         <div className="actions">
-          <Link href="/login?mode=signup&amp;next=%2Fdashboard%3Fonboarding%3Dyoutube" className="button primary">Create account &amp; connect YouTube</Link>
+          <Link href="/login?mode=signup&amp;next=%2Fdashboard" className="button primary">Create account &amp; start translating</Link>
           <a href="#how" className="button secondary">See how it works</a>
         </div>
 
@@ -70,7 +70,7 @@ export default async function Home() {
               <li>Translation and reply drafts</li>
               <li>You approve every posted reply</li>
             </ul>
-            <Link className="button secondary wide" href="/login?mode=signup&amp;next=%2Fdashboard%3Fonboarding%3Dyoutube">Start free</Link>
+            <Link className="button secondary wide" href="/login?mode=signup&amp;next=%2Fdashboard">Start free</Link>
           </article>
 
           <article className="pricingCard featured">
