@@ -1,4 +1,3 @@
-import { randomBytes } from "node:crypto";
 import { BILLING_PLANS, getPriceId } from "../../../../lib/billing";
 import { createAdminSupabase, requireUser } from "../../../../lib/supabase";
 import { getStripe } from "../../../../lib/stripe";
@@ -13,11 +12,12 @@ export async function POST(request) {
 
     const body = await request.json().catch(() => ({}));
     const plan = typeof body.plan === "string" ? body.plan : "";
-    if (!BILLING_PLANS[plan] || plan === "free") {
+    const interval = body.interval === "year" ? "year" : "month";
+    if (!["creator", "unlimited"].includes(plan)) {
       return Response.json({ error: "Choose a paid Commentaid plan." }, { status: 400 });
     }
 
-    const priceId = getPriceId(plan);
+    const priceId = getPriceId(plan, interval);
     if (!priceId) {
       return Response.json({ error: `${BILLING_PLANS[plan].name} checkout is not configured yet.` }, { status: 503 });
     }
@@ -35,6 +35,11 @@ export async function POST(request) {
     }
 
     const stripe = getStripe();
+    const price = await stripe.prices.retrieve(priceId);
+    const expected = Math.round((interval === "year" ? BILLING_PLANS[plan].annualPrice : BILLING_PLANS[plan].monthlyPrice) * 100);
+    if (!price.active || price.currency !== "usd" || price.unit_amount !== expected || price.recurring?.interval !== interval || price.recurring?.interval_count !== 1) {
+      return Response.json({ error: "The selected subscription price is not configured correctly." }, { status: 503 });
+    }
     let customerId = billing?.stripe_customer_id || "";
     if (!customerId) {
       const customer = await stripe.customers.create({
@@ -61,7 +66,6 @@ export async function POST(request) {
       allow_promotion_codes: true,
       success_url: `${origin}/dashboard?billing=success`,
       cancel_url: `${origin}/dashboard?billing=cancelled`,
-      integration_identifier: `commentaid_${randomBytes(4).toString("hex")}`,
       metadata: { commentaid_user_id: auth.user.id, commentaid_plan: plan },
       subscription_data: {
         metadata: { commentaid_user_id: auth.user.id, commentaid_plan: plan },
