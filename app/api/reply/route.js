@@ -2,7 +2,7 @@ import { Output, generateText } from "ai";
 import { createOpenAI } from "@ai-sdk/openai";
 import { z } from "zod";
 import { createAdminSupabase, requireUser } from "../../../lib/supabase";
-import { releaseInteraction, reserveInteraction } from "../../../lib/billing";
+import { releaseReservation, reserveInteraction, mexicoPromotion } from "../../../lib/billing";
 import { checkRateLimit } from "../../../lib/rate-limit";
 
 export const runtime = "nodejs";
@@ -78,11 +78,11 @@ export async function POST(request) {
 
     billingAdmin = createAdminSupabase();
     billingUserId = auth.user.id;
-    reservation = await reserveInteraction(billingAdmin, auth.user.id);
+    reservation = await mexicoPromotion(billingAdmin, request, auth.user.id, "reserve") || await reserveInteraction(billingAdmin, auth.user.id);
     if (!reservation?.allowed) {
       return Response.json(
         {
-          error: reservation?.plan === "creator"
+          error: reservation?.promotion === "mexico" ? "Has utilizado las 100 interacciones gratuitas de la promoción." : reservation?.plan === "creator"
             ? "Your Creator plan has used all 100 AI interactions for this billing period. Upgrade to continue."
             : "Your 10 free AI interactions have been used. Choose a paid plan to continue.",
           usage: reservation,
@@ -110,7 +110,7 @@ For spam or abuse, remain calm and do not intensify the exchange.`,
       const { data: managedComment, error: commentError } = await billingAdmin.from("managed_comments")
         .select("id").eq("id", commentId).eq("user_id", auth.user.id).single();
       if (commentError || !managedComment) {
-        await releaseInteraction(billingAdmin, billingUserId, reservation.periodStart);
+        await releaseReservation(billingAdmin, billingUserId, reservation);
         reservation = null;
         return Response.json({ error: "Managed comment not found." }, { status: 404 });
       }
@@ -137,7 +137,7 @@ For spam or abuse, remain calm and do not intensify the exchange.`,
     });
   } catch (error) {
     if (billingAdmin && reservation?.allowed) {
-      await releaseInteraction(billingAdmin, billingUserId, reservation.periodStart);
+      await releaseReservation(billingAdmin, billingUserId, reservation);
     }
     console.error("Commentaid reply error", error);
     const message = error?.message || "";
