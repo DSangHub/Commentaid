@@ -49,7 +49,7 @@ export default function Dashboard() {
 
     const timer = window.setTimeout(() => {
       if (notice) setIntegrationMessage(notice);
-      if (["creator", "unlimited", "large"].includes(plan)) {
+      if (["creator", "unlimited"].includes(plan)) {
         setPendingPlan(plan);
         setBillingMessage("Your account is ready. Continue to Stripe to activate your selected plan.");
       } else if (billing === "success") {
@@ -122,7 +122,7 @@ export default function Dashboard() {
     return () => window.clearTimeout(timer);
   }, [user, loadYouTubeStatus, loadBillingStatus]);
 
-  async function startCheckout(plan) {
+  async function startCheckout(plan, interval = "month") {
     setBillingBusy(true);
     setBillingMessage("");
     try {
@@ -130,7 +130,7 @@ export default function Dashboard() {
       const response = await fetch("/api/billing/checkout", {
         method: "POST",
         headers: { "content-type": "application/json", authorization: `Bearer ${token}` },
-        body: JSON.stringify({ plan }),
+        body: JSON.stringify({ plan, interval }),
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Checkout could not be started.");
@@ -241,6 +241,8 @@ export default function Dashboard() {
         <p>Manage multilingual comments from any post or ad through one AI bridge.</p>
       </header>
 
+      <ReplyComposer key={selectedComment.id || selectedComment.text || "manual"} getAccessToken={getAccessToken} initialComment={selectedComment.text} initialCommentId={selectedComment.id} onUsageChange={loadBillingStatus} />
+
       <section className="workspaceCard billingCard" aria-labelledby="billing-title">
         <div className="cardHeading">
           <div>
@@ -259,9 +261,10 @@ export default function Dashboard() {
               <button className="button secondary" type="button" onClick={manageBilling} disabled={billingBusy}>Manage billing</button>
             ) : (
               <div className="billingActions">
-                <button className="miniButton accent" type="button" onClick={() => startCheckout("creator")} disabled={billingBusy}>Creator $9.95</button>
-                <button className="miniButton accent" type="button" onClick={() => startCheckout("unlimited")} disabled={billingBusy}>Unlimited $19.95</button>
-                <button className="miniButton accent" type="button" onClick={() => startCheckout("large")} disabled={billingBusy}>Large $49.95</button>
+                <button className="miniButton accent" type="button" onClick={() => startCheckout("creator")} disabled={billingBusy}>Creator $2.99/mo</button>
+                <button className="miniButton accent" type="button" onClick={() => startCheckout("unlimited")} disabled={billingBusy}>Unlimited $9.95/mo</button>
+                <button className="miniButton accent" type="button" onClick={() => startCheckout("creator", "year")} disabled={billingBusy}>Creator $19.95/year</button>
+                <button className="miniButton accent" type="button" onClick={() => startCheckout("unlimited", "year")} disabled={billingBusy}>Unlimited $99/year</button>
               </div>
             )}
           </div>
@@ -300,7 +303,6 @@ export default function Dashboard() {
         {integrationMessage && <div className="banner" role="status">{integrationMessage}</div>}
       </section>
 
-      <ReplyComposer key={selectedComment.id || selectedComment.text || "manual"} getAccessToken={getAccessToken} initialComment={selectedComment.text} initialCommentId={selectedComment.id} onUsageChange={loadBillingStatus} />
 
       {managedFeed?.comments?.length > 0 && (
         <section className="workspaceCard" aria-labelledby="managed-comments-title">
