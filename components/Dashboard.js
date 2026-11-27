@@ -1,4 +1,6 @@
 "use client";
+import { useLocale } from "./Locale";
+import LanguageToggle from "../app/LanguageToggle";
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
@@ -7,6 +9,8 @@ import { tryCreateBrowserSupabase } from "../lib/supabase";
 import ReplyComposer from "./ReplyComposer";
 
 export default function Dashboard() {
+  const { lang } = useLocale();
+  const t = (en, es) => lang === "es" ? es : en;
   const router = useRouter();
   const [supabase] = useState(() => tryCreateBrowserSupabase());
   const [user, setUser] = useState(null);
@@ -223,22 +227,22 @@ export default function Dashboard() {
     router.replace("/login");
   }
 
-  if (checking) return <main className="loadingPage">Loading your dashboard…</main>;
+  if (checking) return <main className="loadingPage">{t("Loading your dashboard…", "Cargando tu panel…")}</main>;
 
   return (
     <main className="dashboardShell">
       <nav className="dashboardNav">
         <Link className="brand" href="/">Commentaid</Link>
-        <div className="userBar">
+        <div className="userBar"><LanguageToggle />
           <span>{user?.email}</span>
-          <button className="miniButton" type="button" onClick={signOut}>Sign out</button>
+          <button className="miniButton" type="button" onClick={signOut}>{t("Sign out", "Cerrar sesión")}</button>
         </div>
       </nav>
 
       <header className="dashboardHead">
-        <p className="eyebrow">COMMENT COMMAND CENTER</p>
-        <h1>Translate. Respond. Grow.</h1>
-        <p>Manage multilingual comments from any post or ad through one AI bridge.</p>
+        <p className="eyebrow">{t("COMMENT COMMAND CENTER", "CENTRO DE COMENTARIOS")}</p>
+        <h1>{t("Translate. Respond. Grow.", "Traduce. Responde. Crece.")}</h1>
+        <p>{t("Manage multilingual comments from any post or ad through one AI bridge.", "Gestiona comentarios multilingües de cualquier publicación o anuncio con IA.")}</p>
       </header>
 
       <ReplyComposer key={selectedComment.id || selectedComment.text || "manual"} getAccessToken={getAccessToken} initialComment={selectedComment.text} initialCommentId={selectedComment.id} onUsageChange={loadBillingStatus} />
@@ -246,7 +250,7 @@ export default function Dashboard() {
       <section className="workspaceCard billingCard" aria-labelledby="billing-title">
         <div className="cardHeading">
           <div>
-            <p className="eyebrow">PLAN &amp; USAGE</p>
+            <p className="eyebrow">{t("PLAN & USAGE", "PLAN Y USO")}</p>
             <h2 id="billing-title">{billingStatus?.planName || "Loading plan…"}</h2>
           </div>
           {billingStatus && <span className="statusDot">{billingStatus.status}</span>}
@@ -254,24 +258,24 @@ export default function Dashboard() {
         {billingStatus && (
           <div className="billingSummary">
             <div>
-              <strong>{billingStatus.limit === null ? "Unlimited AI interactions" : `${billingStatus.used} of ${billingStatus.limit} AI interactions used`}</strong>
-              <p>{billingStatus.remaining === null ? "No monthly interaction cap." : `${billingStatus.remaining} remaining in this period.`}</p>
+              <strong>{billingStatus.limit === null ? t("Unlimited AI interactions", "Interacciones con IA ilimitadas") : `${billingStatus.used} of ${billingStatus.limit} AI interactions used`}</strong>
+              <p>{billingStatus.remaining === null ? t("No monthly interaction cap.", "Sin límite mensual de interacciones.") : `${billingStatus.remaining} remaining in this period.`}</p>
             </div>
             {billingStatus.canManageBilling && billingStatus.plan !== "free" ? (
-              <button className="button secondary" type="button" onClick={manageBilling} disabled={billingBusy}>Manage billing</button>
+              <button className="button secondary" type="button" onClick={manageBilling} disabled={billingBusy}>{t("Manage billing", "Gestionar pagos")}</button>
             ) : (
               <div className="billingActions">
-                <button className="miniButton accent" type="button" onClick={() => startCheckout("creator")} disabled={billingBusy}>Creator $2.99/mo</button>
-                <button className="miniButton accent" type="button" onClick={() => startCheckout("unlimited")} disabled={billingBusy}>Unlimited $9.95/mo</button>
-                <button className="miniButton accent" type="button" onClick={() => startCheckout("creator", "year")} disabled={billingBusy}>Creator $19.95/year</button>
-                <button className="miniButton accent" type="button" onClick={() => startCheckout("unlimited", "year")} disabled={billingBusy}>Unlimited $99/year</button>
+                <button className="miniButton accent" type="button" onClick={() => startCheckout("creator")} disabled={billingBusy}>{t("Creator $2.99/mo", "Creador $2.99/mes")}</button>
+                <button className="miniButton accent" type="button" onClick={() => startCheckout("unlimited")} disabled={billingBusy}>{t("Unlimited $9.95/mo", "Ilimitado $9.95/mes")}</button>
+                <button className="miniButton accent" type="button" onClick={() => startCheckout("creator", "year")} disabled={billingBusy}>{t("Creator $19.95/year", "Creador $19.95/año")}</button>
+                <button className="miniButton accent" type="button" onClick={() => startCheckout("unlimited", "year")} disabled={billingBusy}>{t("Unlimited $99/year", "Ilimitado $99/año")}</button>
               </div>
             )}
           </div>
         )}
         {pendingPlan && billingStatus?.plan === "free" && (
           <button className="button primary billingContinue" type="button" onClick={() => startCheckout(pendingPlan)} disabled={billingBusy}>
-            {billingBusy ? "Opening secure checkout…" : "Continue to secure checkout"}
+            {billingBusy ? t("Opening secure checkout…", "Abriendo pago seguro…") : t("Continue to secure checkout", "Continuar al pago seguro")}
           </button>
         )}
         {billingMessage && <div className="banner" role="status">{billingMessage}</div>}
@@ -280,23 +284,23 @@ export default function Dashboard() {
       <section className="workspaceCard integrationCard" aria-labelledby="youtube-connect-title">
         <div className="cardHeading">
           <div>
-            <p className="eyebrow">MANAGED ACCOUNTS</p>
-            <h2 id="youtube-connect-title">YouTube connection</h2>
+            <p className="eyebrow">{t("MANAGED ACCOUNTS", "CUENTAS GESTIONADAS")}</p>
+            <h2 id="youtube-connect-title">{t("YouTube connection", "Conexión con YouTube")}</h2>
           </div>
-          <span className="statusDot">{youtubeAccounts.length ? "Connected" : "Not connected"}</span>
+          <span className="statusDot">{youtubeAccounts.length ? t("Connected", "Conectado") : t("Not connected", "Sin conectar")}</span>
         </div>
         {youtubeAccounts.length ? (
           <div className="integrationRow">
-            <div><strong>{youtubeAccounts[0].display_name}</strong><p>Connected · Replies post only after approval</p></div>
-            <button className="button primary" type="button" onClick={syncManagedComments} disabled={integrationBusy}>{integrationBusy ? "Syncing…" : "Sync comments"}</button>
+            <div><strong>{youtubeAccounts[0].display_name}</strong><p>{t("Connected · Replies post only after approval", "Conectado · Las respuestas se publican solo tras tu aprobación")}</p></div>
+            <button className="button primary" type="button" onClick={syncManagedComments} disabled={integrationBusy}>{integrationBusy ? t("Syncing…", "Sincronizando…") : t("Sync comments", "Sincronizar comentarios")}</button>
           </div>
         ) : (
           <div className="integrationRow">
-            <p>Authorize Commentaid to read comments and post only the replies you approve.</p>
+            <p>{t("Authorize Commentaid to read comments and post only the replies you approve.", "Autoriza a Commentaid a leer comentarios y publicar solo las respuestas que apruebes.")}</p>
             {youtubeAuthorizationUrl ? (
-              <a className="button primary" href={youtubeAuthorizationUrl}>Continue to Google</a>
+              <a className="button primary" href={youtubeAuthorizationUrl}>{t("Continue to Google", "Continuar con Google")}</a>
             ) : (
-              <button className="button primary" type="button" onClick={connectYouTube} disabled={integrationBusy}>{integrationBusy ? "Preparing Google…" : "Connect YouTube"}</button>
+              <button className="button primary" type="button" onClick={connectYouTube} disabled={integrationBusy}>{integrationBusy ? t("Preparing Google…", "Preparando Google…") : t("Connect YouTube", "Conectar YouTube")}</button>
             )}
           </div>
         )}
@@ -306,13 +310,13 @@ export default function Dashboard() {
 
       {managedFeed?.comments?.length > 0 && (
         <section className="workspaceCard" aria-labelledby="managed-comments-title">
-          <div className="cardHeading"><div><p className="eyebrow">APPROVAL QUEUE</p><h2 id="managed-comments-title">Connected-channel comments</h2></div></div>
+          <div className="cardHeading"><div><p className="eyebrow">{t("APPROVAL QUEUE", "RESPUESTAS PENDIENTES")}</p><h2 id="managed-comments-title">{t("Connected-channel comments", "Comentarios del canal conectado")}</h2></div></div>
           <div className="commentList">
             {managedFeed.comments.map((comment) => (
               <article className="commentCard" key={comment.id}>
                 <div className="commentMeta"><strong>{comment.author_name}</strong><span>{comment.status}</span></div>
                 <p>{comment.body}</p>
-                <button className="miniButton accent" type="button" onClick={() => { setSelectedComment({ text: comment.body, id: comment.id }); window.scrollTo({ top: 0, behavior: "smooth" }); }}>Draft managed reply</button>
+                <button className="miniButton accent" type="button" onClick={() => { setSelectedComment({ text: comment.body, id: comment.id }); window.scrollTo({ top: 0, behavior: "smooth" }); }}>{t("Draft managed reply", "Preparar respuesta")}</button>
               </article>
             ))}
           </div>
@@ -322,21 +326,21 @@ export default function Dashboard() {
       <section className="workspaceCard" aria-labelledby="monitor-title">
         <div className="cardHeading">
           <div>
-            <p className="eyebrow">YOUTUBE MONITOR</p>
-            <h2 id="monitor-title">Recent channel comments</h2>
+            <p className="eyebrow">{t("YOUTUBE MONITOR", "MONITOR DE YOUTUBE")}</p>
+            <h2 id="monitor-title">{t("Recent channel comments", "Comentarios recientes del canal")}</h2>
           </div>
         </div>
 
         <form className="channelForm" onSubmit={loadChannel}>
           <input
-            aria-label="YouTube channel"
-            placeholder="@handle, channel ID, or YouTube channel URL"
+            aria-label={t("YouTube channel", "Canal de YouTube")}
+            placeholder={t("@handle, channel ID, or YouTube channel URL", "@usuario, ID o URL del canal de YouTube")}
             value={channel}
             onChange={(event) => setChannel(event.target.value)}
             required
           />
           <button className="button primary" disabled={loadingFeed} type="submit">
-            {loadingFeed ? "Loading…" : "Load comments"}
+            {loadingFeed ? t("Loading…", "Cargando…") : t("Load comments", "Cargar comentarios")}
           </button>
         </form>
 
@@ -348,7 +352,7 @@ export default function Dashboard() {
           </div>
         )}
         {feed && feed.comments.length === 0 && (
-          <div className="emptyState">No recent comments were found for this channel.</div>
+          <div className="emptyState">{t("No recent comments were found for this channel.", "No se encontraron comentarios recientes en este canal.")}</div>
         )}
         <div className="commentList">
           {feed?.comments.map((comment) => (
@@ -369,7 +373,7 @@ export default function Dashboard() {
                 >
                   Draft reply
                 </button>
-                <a href={comment.url} target="_blank" rel="noreferrer">View on YouTube</a>
+                <a href={comment.url} target="_blank" rel="noreferrer">{t("View on YouTube", "Ver en YouTube")}</a>
               </div>
             </article>
           ))}
