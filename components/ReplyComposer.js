@@ -1,4 +1,5 @@
 "use client";
+import { useLocale } from "./Locale";
 
 import { useState } from "react";
 
@@ -6,6 +7,8 @@ const tones = ["Warm", "Brief", "Helpful", "Professional", "Sales"];
 const replyLanguages = [["original","Same as commenter"],["en","English"],["es","Spanish"],["fr","French"],["pt","Portuguese"],["de","German"],["it","Italian"],["nl","Dutch"],["ar","Arabic"],["hi","Hindi"],["ur","Urdu"],["pa","Punjabi"],["id","Indonesian"],["zh","Chinese"],["ja","Japanese"],["ko","Korean"],["vi","Vietnamese"],["th","Thai"],["tr","Turkish"],["ru","Russian"],["bn","Bengali"],["sw","Swahili"],["tl","Filipino"],["ta","Tamil"],["te","Telugu"]];
 
 export default function ReplyComposer({ getAccessToken, initialComment = "", initialCommentId = "", onUsageChange }) {
+  const { lang } = useLocale();
+  const t = (en, es) => lang === "es" ? es : en;
   const [comment, setComment] = useState(initialComment);
   const [context, setContext] = useState("");
   const [tone, setTone] = useState("Helpful");
@@ -27,7 +30,7 @@ export default function ReplyComposer({ getAccessToken, initialComment = "", ini
       if (!text) throw new Error("Your clipboard is empty.");
       setComment(text);
     } catch {
-      setError("Paste permission was unavailable. Press and hold in the box to paste.");
+      setError(t("Paste permission was unavailable. Press and hold in the box to paste.","No hay permiso para pegar. Mantén presionado el campo para pegar."));
     }
   }
 
@@ -69,7 +72,7 @@ export default function ReplyComposer({ getAccessToken, initialComment = "", ini
       setCopied(true);
       window.setTimeout(() => setCopied(false), 1800);
     } catch {
-      setError("Copy permission was unavailable. Select the reply and copy it manually.");
+      setError(t("Copy permission was unavailable. Select the reply and copy it manually.","No hay permiso para copiar. Selecciona la respuesta y cópiala manualmente."));
     }
   }
 
@@ -98,15 +101,15 @@ export default function ReplyComposer({ getAccessToken, initialComment = "", ini
     <section className="workspaceCard" aria-labelledby="composer-title">
       <div className="cardHeading">
         <div>
-          <p className="eyebrow">COPY &amp; PASTE BRIDGE</p>
-          <h2 id="composer-title">Answer any comment</h2>
+          <p className="eyebrow">{t("COPY & PASTE BRIDGE", "COPIA Y PEGA")}</p>
+          <h2 id="composer-title">{t("Answer any comment", "Responde a cualquier comentario")}</h2>
         </div>
-        <span className="statusDot">Works with any app</span>
+        <span className="statusDot">{t("Works with any app", "Funciona con cualquier aplicación")}</span>
       </div>
 
       <form onSubmit={generateReply}>
         <div className="fieldTop">
-          <label htmlFor="source-comment">Comment in any language</label>
+          <label htmlFor="source-comment">{t("Comment in any language", "Comentario en cualquier idioma")}</label>
           <button className="miniButton" type="button" onClick={pasteComment}>
             Paste from clipboard
           </button>
@@ -115,7 +118,7 @@ export default function ReplyComposer({ getAccessToken, initialComment = "", ini
           id="source-comment"
           rows={5}
           maxLength={3000}
-          placeholder="Copy a comment from YouTube, Instagram, TikTok, Facebook, an ad, or any website, then paste it here…"
+          placeholder={t("Copy a comment from YouTube, Instagram, TikTok, Facebook, an ad, or any website, then paste it here…", "Copia un comentario de YouTube, Instagram, TikTok, Facebook, un anuncio o cualquier sitio y pégalo aquí…")}
           value={comment}
           onChange={(event) => setComment(event.target.value)}
           required
@@ -123,23 +126,23 @@ export default function ReplyComposer({ getAccessToken, initialComment = "", ini
 
         <div className="composerGrid">
           <div>
-            <label htmlFor="reply-language">Translate reply into</label>
+            <label htmlFor="reply-language">{t("Translate reply into", "Traducir la respuesta a")}</label>
             <select id="reply-language" value={replyLanguage} onChange={(event) => setReplyLanguage(event.target.value)}>
               {replyLanguages.map(([code, label]) => <option key={code} value={code}>{label}</option>)}
             </select>
           </div>
           <div>
-            <label htmlFor="tone">Reply tone</label>
+            <label htmlFor="tone">{t("Reply tone", "Tono de respuesta")}</label>
             <select id="tone" value={tone} onChange={(event) => setTone(event.target.value)}>
               {tones.map((option) => <option key={option}>{option}</option>)}
             </select>
           </div>
           <div>
-            <label htmlFor="context">Business context (optional)</label>
+            <label htmlFor="context">{t("Business context (optional)", "Contexto del negocio (opcional)")}</label>
             <input
               id="context"
               maxLength={500}
-              placeholder="Product link, hours, policy, or facts AI may use"
+              placeholder={t("Product link, hours, policy, or facts AI may use", "Enlace del producto, horarios, políticas o datos para la IA")}
               value={context}
               onChange={(event) => setContext(event.target.value)}
             />
@@ -147,7 +150,7 @@ export default function ReplyComposer({ getAccessToken, initialComment = "", ini
         </div>
 
         <button className="button primary" disabled={busy || !comment.trim()} type="submit">
-          {busy ? "Translating and drafting…" : "Translate and draft reply"}
+          {busy ? t("Translating and drafting…", "Traduciendo y preparando respuestas…") : t("Translate and draft reply", "Traducir y preparar respuesta")}
         </button>
       </form>
 
@@ -163,11 +166,11 @@ export default function ReplyComposer({ getAccessToken, initialComment = "", ini
           </div>
 
           <div className="translationBox">
-            <strong>English translation</strong>
+            <strong>{t("English translation", "Traducción al inglés")}</strong>
             <p>{result.translation}</p>
           </div>
 
-          <label>Choose a draft</label>
+          <label>{t("Choose a draft", "Elige un borrador")}</label>
           <div className="replyOptions">
             {result.options.map((option, index) => (
               <button
@@ -189,11 +192,11 @@ export default function ReplyComposer({ getAccessToken, initialComment = "", ini
           </div>
 
           <div className="translationBox replyReview" aria-live="polite">
-            <strong>Review the reply in English</strong>
+            <strong>{t("Review the reply in English", "Revisa la respuesta en inglés")}</strong>
             <p>{englishReply}</p>
           </div>
 
-          <label htmlFor="final-reply">Edit, then copy the translated reply</label>
+          <label htmlFor="final-reply">{t("Edit, then copy the translated reply", "Edita y copia la respuesta traducida")}</label>
           <textarea
             id="final-reply"
             rows={4}
@@ -204,11 +207,11 @@ export default function ReplyComposer({ getAccessToken, initialComment = "", ini
             }}
           />
           <button className="button copyButton" type="button" onClick={copyReply} disabled={!reply}>
-            {copied ? "Copied ✓" : "Copy reply"}
+            {copied ? t("Copied ✓", "Copiado ✓") : t("Copy reply", "Copiar respuesta")}
           </button>
           {initialCommentId && draftId && (
             <button className="button primary postButton" type="button" onClick={approveAndPost} disabled={posting || result.risk !== "routine"}>
-              {posting ? "Posting…" : posted ? "Posted to YouTube ✓" : result.risk === "routine" ? "Approve & post to YouTube" : "Human review required"}
+              {posting ? t("Posting…", "Publicando…") : posted ? t("Posted to YouTube ✓", "Publicado en YouTube ✓") : result.risk === "routine" ? t("Approve & post to YouTube", "Aprobar y publicar en YouTube") : t("Human review required", "Se requiere revisión humana")}
             </button>
           )}
         </div>
