@@ -1,4 +1,6 @@
 "use client";
+import { useLocale } from "./Locale";
+import LanguageToggle from "../app/LanguageToggle";
 
 import { useState } from "react";
 import Link from "next/link";
@@ -6,6 +8,8 @@ import { useRouter } from "next/navigation";
 import { createBrowserSupabase } from "../lib/supabase";
 
 export default function AuthForm({ initialMode = "signin", nextPath = "/dashboard" }) {
+  const { lang } = useLocale();
+  const t = (en, es) => lang === "es" ? es : en;
   const router = useRouter();
   const [mode, setMode] = useState(initialMode === "signup" ? "signup" : "signin");
   const [email, setEmail] = useState("");
@@ -33,7 +37,7 @@ export default function AuthForm({ initialMode = "signin", nextPath = "/dashboar
       if (result.error) throw result.error;
 
       if (mode === "signup" && !result.data.session) {
-        setMessage("Check your email to confirm your account, then return here and sign in to connect your channel.");
+        setMessage(t("Check your email to confirm your account, then return here and sign in to connect your channel.","Revisa tu correo para confirmar tu cuenta. Después, vuelve e inicia sesión."));
         setMode("signin");
       } else {
         router.replace(destination);
@@ -48,19 +52,20 @@ export default function AuthForm({ initialMode = "signin", nextPath = "/dashboar
   return (
     <main className="authWrap">
       <section className="authCard" aria-labelledby="auth-title">
+        <LanguageToggle />
         <Link className="authBrand" href="/">Commentaid</Link>
-        <p className="eyebrow">AI COMMENT BRIDGE</p>
+        <p className="eyebrow">{t("AI COMMENT BRIDGE", "PUENTE DE COMENTARIOS CON IA")}</p>
         <h1 id="auth-title" className="authTitle">
-          {mode === "signin" ? "Welcome back" : "Create your account"}
+          {mode === "signin" ? t("Welcome back", "Bienvenido de nuevo") : t("Create your account", "Crea tu cuenta")}
         </h1>
         <p className="authSub">
           {mode === "signin"
-            ? "Sign in to manage comments and multilingual replies."
-            : "Create an account to let Commentaid help manage your comments. Next, connect your YouTube channel and authorize access through Google. Review AI replies in English and approve them before posting."}
+            ? t("Sign in to manage comments and multilingual replies.", "Inicia sesión para gestionar comentarios y respuestas multilingües.")
+            : t("Create an account to let Commentaid help manage your comments. Next, connect your YouTube channel and authorize access through Google. Review AI replies in English and approve them before posting.", "Crea tu cuenta y empieza a traducir comentarios. Conectar YouTube es opcional. Revisa y aprueba las respuestas antes de publicarlas.")}
         </p>
 
         <form className="authForm" onSubmit={handleSubmit}>
-          <label htmlFor="email">Email</label>
+          <label htmlFor="email">{t("Email", "Correo electrónico")}</label>
           <input
             id="email"
             type="email"
@@ -71,13 +76,13 @@ export default function AuthForm({ initialMode = "signin", nextPath = "/dashboar
             required
           />
 
-          <label htmlFor="password">Password</label>
+          <label htmlFor="password">{t("Password", "Contraseña")}</label>
           <input
             id="password"
             type="password"
             autoComplete={mode === "signin" ? "current-password" : "new-password"}
             minLength={6}
-            placeholder="At least 6 characters"
+            placeholder={t("At least 6 characters", "Al menos 6 caracteres")}
             value={password}
             onChange={(event) => setPassword(event.target.value)}
             required
@@ -87,10 +92,10 @@ export default function AuthForm({ initialMode = "signin", nextPath = "/dashboar
 
           <button className="button primary wide" disabled={busy} type="submit">
             {busy
-              ? "Please wait…"
+              ? t("Please wait…", "Espera un momento…")
               : mode === "signin"
-                ? "Sign in"
-                : "Create account & continue"}
+                ? t("Sign in", "Iniciar sesión")
+                : t("Create account & continue", "Crear cuenta y continuar")}
           </button>
         </form>
 
@@ -103,8 +108,8 @@ export default function AuthForm({ initialMode = "signin", nextPath = "/dashboar
           }}
         >
           {mode === "signin"
-            ? "New to Commentaid? Create an account"
-            : "Already have an account? Sign in"}
+            ? t("New to Commentaid? Create an account", "¿Nuevo en Commentaid? Crea una cuenta")
+            : t("Already have an account? Sign in", "¿Ya tienes cuenta? Inicia sesión")}
         </button>
       </section>
     </main>
